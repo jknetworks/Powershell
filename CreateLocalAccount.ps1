@@ -4,3 +4,13 @@
 
 $Password = Read-Host -AsSecureString
 New-LocalUser "User" -Password $Password -FullName "First Last" -Description "Description of this account." -PasswordNeverExpires
+
+# PASSWORD EXPIRATION
+
+Set-LocalUser -Name "User" -PasswordNeverExpires 
+
+
+# COMMAND PROMPT
+net user account_name  # CHECK POLICY
+wmic useraccount where "Name='account_name'" set PasswordExpires=false  #SET POLICY
+
