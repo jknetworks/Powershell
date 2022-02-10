@@ -1,0 +1,10 @@
+# NETSH (not powershell) 
+# Firewall Settings
+
+netsh advfirewall firewall set rule name="COM+ Network Access (DCOM-In)" new enable=Yes
+netsh advfirewall firewall set rule name="Remote Event Log Management (NP-In)" new enable=Yes
+netsh advfirewall firewall set rule name="Remote Event Log Management (RPC)" new enable=Yes
+netsh advfirewall firewall set rule name="Remote Event Log Management (RPC-EPMAP)" new enable=Yes
+netsh advfirewall firewall set rule name="Windows Management Instrumentation (ASync-In)" new enable=Yes
+netsh advfirewall firewall set rule name="Windows Management Instrumentation (DCOM-In)" new enable=Yes
+netsh advfirewall firewall set rule name="Windows Management Instrumentation (WMI-In)" new enable=Yes
