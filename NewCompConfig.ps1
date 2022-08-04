@@ -5,7 +5,7 @@ Restart-Computer -Force
 
 
 #JOIN DOMAIN
-add-computer –domainname domain.com -Credential domain\administrator -restart –force
+add-computer â€“domainname domain.com -Credential domain\administrator -restart â€“force
 
 
 #PSREMOTE
@@ -20,3 +20,6 @@ Get-NetFirewallRule -Name *RemoteDesktop* | Set-NetFirewallRule -Enabled 'True'
 
 #PING
 netsh advfirewall firewall add rule name="ICMP Allow incoming V4 echo request" protocol=icmpv4:8,any dir=in action=allow
+
+#REMOTE EVENT VIEWER
+netsh advfirewall firewall set rule group="Remote Event Log Management" new enable=yes
