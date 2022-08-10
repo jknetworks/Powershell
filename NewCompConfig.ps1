@@ -23,3 +23,7 @@ netsh advfirewall firewall add rule name="ICMP Allow incoming V4 echo request" p
 
 #REMOTE EVENT VIEWER
 netsh advfirewall firewall set rule group="Remote Event Log Management" new enable=yes
+
+#REMOTE DESKTOP
+netsh advfirewall firewall set rule group="remote desktop" new enable=Yes
+
