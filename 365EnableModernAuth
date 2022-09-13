@@ -1,0 +1,15 @@
+Import-Module ExchangeOnlineManagement
+Connect-ExchangeOnline -UserPrincipalName <UPN> 
+
+
+# TO ENABLE Modern Authentication
+
+Set-OrganizationConfig -OAuth2ClientProfileEnabled $true
+
+# TO DISABLE Modern Authentication
+
+Set-OrganizationConfig -OAuth2ClientProfileEnabled $false
+
+# CHECK
+
+Get-OrganizationConfig | Format-Table Name,OAuth* -Auto
