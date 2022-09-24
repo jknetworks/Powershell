@@ -20,6 +20,7 @@ Get-NetFirewallRule -Name *RemoteDesktop* | Set-NetFirewallRule -Enabled 'True'
 
 #PING
 netsh advfirewall firewall add rule name="ICMP Allow incoming V4 echo request" protocol=icmpv4:8,any dir=in action=allow
+netsh advfirewall firewall add rule name="ICMP Allow incoming V6 echo request" protocol=icmpv6:8,any dir=in action=allow
 
 #REMOTE EVENT VIEWER
 netsh advfirewall firewall set rule group="Remote Event Log Management" new enable=yes
