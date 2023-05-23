@@ -3,7 +3,14 @@
 # CREATE NEW LOCAL USER
 
 $Password = Read-Host -AsSecureString
-New-LocalUser "User" -Password $Password -FullName "First Last" -Description "Description of this account." -PasswordNeverExpires
+
+$params = @{
+    Name        = 'localAdmin'
+    Password    = $Password
+    FullName    = 'Local Admin'
+    Description = 'This PC Local Administrator.'
+}
+New-LocalUser @params
 
 # PASSWORD EXPIRATION
 
