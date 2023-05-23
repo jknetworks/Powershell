@@ -16,6 +16,8 @@ New-LocalUser @params
 
 Set-LocalUser -Name "User" -PasswordNeverExpires 
 
+# Local Users and Groups Manager
+lusrmgr.msc
 
 # COMMAND PROMPT
 net user account_name  # CHECK POLICY
