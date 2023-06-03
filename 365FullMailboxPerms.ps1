@@ -7,4 +7,6 @@ Connect-ExchangeOnline -UserPrincipalName "admin email address"
 
 Add-MailboxPermission -Identity 'Mailbox' -User 'Username' -AccessRights FullAccess -InheritanceType All -Automapping $True
 
+Remove-MailboxPermission -Identity "Mailbox" -User "Username" -AccessRights FullAccess -InheritanceType All
+
 Disconnect-ExchangeOnline
