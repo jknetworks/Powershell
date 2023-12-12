@@ -1,0 +1,4 @@
+Enable-Mailbox -Identity user -Archive
+
+# Enable Auto Expanding Archive
+Enable-Mailbox UserMailbox -AutoExpandingArchive
