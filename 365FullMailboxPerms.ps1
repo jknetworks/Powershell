@@ -10,3 +10,7 @@ Add-MailboxPermission -Identity 'Mailbox' -User 'Username' -AccessRights FullAcc
 Remove-MailboxPermission -Identity "Mailbox" -User "Username" -AccessRights FullAccess -InheritanceType All
 
 Disconnect-ExchangeOnline
+
+#PREMISSIONS REPORT
+Get-Mailbox -resultsize unlimited | Get-MailboxPermission | Select Identity, User, Deny, AccessRights, IsInherited| Export-Csv -Path "c:\temp\mailboxpermissions.csv" –NoTypeInformation
+
