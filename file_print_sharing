@@ -1,0 +1,39 @@
+Enable FP Sharing
+Enable-NetAdapterBinding -Name "Network Adapter Name" -DisplayName "File and Printer Sharing for Microsoft Networks"
+
+Disable FP Sharing
+Disable-NetAdapterBinding -Name "Network Adapter Name" -DisplayName "File and Printer Sharing for Microsoft Networks"
+
+Enable CMD
+netsh advfirewall firewall set rule group="File and Printer Sharing" new enable=Yes
+
+Disable CMD
+netsh advfirewall firewall set rule group="File and Printer Sharing" new enable=No
+
+
+Enable PS
+
+Set-NetFirewallRule -DisplayGroup "File And Printer Sharing" -Enabled True -Profile Any
+
+Set-NetFirewallRule -DisplayGroup "File And Printer Sharing" -Enabled True -Profile Domain
+
+Set-NetFirewallRule -DisplayGroup "File And Printer Sharing" -Enabled True -Profile Private
+
+Set-NetFirewallRule -DisplayGroup "File And Printer Sharing" -Enabled True -Profile Public
+
+Disable PS
+
+Set-NetFirewallRule -DisplayGroup "File And Printer Sharing" -Enabled False -Profile Any
+
+Set-NetFirewallRule -DisplayGroup "File And Printer Sharing" -Enabled False -Profile Domain
+
+Set-NetFirewallRule -DisplayGroup "File And Printer Sharing" -Enabled False -Profile Private
+
+Set-NetFirewallRule -DisplayGroup "File And Printer Sharing" -Enabled False -Profile Public
+
+
+
+Network Profile
+Get-NetConnectionProfile
+
+Set-NetConnectionProfile -Name "Network-Name" -NetworkCategory Private
