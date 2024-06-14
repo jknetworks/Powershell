@@ -1,0 +1,3 @@
+# Convert the mailbox to shared
+
+Set-Mailbox -Identity USER@DOMAIN.COM -Type Shared
