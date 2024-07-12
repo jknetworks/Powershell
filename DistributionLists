@@ -1,0 +1,15 @@
+$User = "user@email.com"
+$results = @()
+
+Get-DistributionGroup -ResultSize Unlimited | ForEach-Object {
+    $group = $_
+    $members = Get-DistributionGroupMember $group.Identity | Where-Object {$_.PrimarySMTPAddress -eq $User}
+    if ($members) {
+        $results += [PSCustomObject]@{
+            GroupName = $group.Name
+            UserName  = $members.Name
+        }
+    }
+}
+
+$results | Out-GridView -Title "Distribution Groups for $User"
