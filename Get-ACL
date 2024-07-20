@@ -1,0 +1,20 @@
+$securityGroupName = "YourSecurityGroupName"
+$startPath = "C:\Path\To\Start\Search"
+$outputFile = "C:\Path\To\Output\security_group_folders.csv"
+
+$results = Get-ChildItem -Path $startPath -Recurse -Directory | ForEach-Object {
+    $folderPath = $_.FullName
+    $acl = Get-Acl -Path $folderPath
+    $acl.Access | Where-Object { $_.IdentityReference -like "*$securityGroupName*" } | ForEach-Object {
+        [PSCustomObject]@{
+            FolderPath = $folderPath
+            IdentityReference = $_.IdentityReference
+            FileSystemRights = $_.FileSystemRights
+            AccessControlType = $_.AccessControlType
+        }
+    }
+}
+
+$results | Export-Csv -Path $outputFile -NoTypeInformation
+
+Write-Host "Results exported to $outputFile"
