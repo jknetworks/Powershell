@@ -1,0 +1,5 @@
+$folder1 = Get-ChildItem -Recurse -path C:\folder1
+
+$folder2 = Get-ChildItem -Recurse -path C:\folder2
+
+Compare-Object -ReferenceObject $folder1 -DifferenceObject $folder2 | Out-File c:\compare.txt
