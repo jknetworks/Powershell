@@ -1,0 +1,36 @@
+# Check basic Windows 11 hardware requirements
+$results = [PSCustomObject]@{
+    "CPU Architecture (64-bit)" = $env:PROCESSOR_ARCHITECTURE -eq "ARM64" -or $env:PROCESSOR_ARCHITECTURE -eq "AMD64"
+    "RAM >= 4GB"                = (Get-CimInstance Win32_ComputerSystem).TotalPhysicalMemory -ge 4GB
+    "Storage >= 64GB"           = (Get-PSDrive -Name C).Free -ge 64GB
+    "TPM 2.0 Present"           = $false
+    "Secure Boot Enabled"       = $false
+    "UEFI Firmware"             = $false
+}
+
+# Check TPM version
+try {
+    $tpm = Get-WmiObject -Namespace "Root\CIMv2\Security\MicrosoftTpm" -Class Win32_Tpm
+    if ($tpm -and $tpm.SpecVersion -match "2.0") {
+        $results."TPM 2.0 Present" = $true
+    }
+} catch {}
+
+# Check Secure Boot
+try {
+    $secureBoot = Confirm-SecureBootUEFI
+    if ($secureBoot -eq $true) {
+        $results."Secure Boot Enabled" = $true
+    }
+} catch {}
+
+# Check UEFI
+try {
+    $firmwareType = (Get-CimInstance -ClassName Win32_ComputerSystem).BootupState
+    if ($firmwareType -like "*UEFI*") {
+        $results."UEFI Firmware" = $true
+    }
+} catch {}
+
+# Output Results
+$results | Format-Table -AutoSize
