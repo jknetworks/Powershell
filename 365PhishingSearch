@@ -1,0 +1,39 @@
+# Connect to Microsoft Purview (Security & Compliance Center)
+Connect-IPPSSession
+
+# --------------------------
+# CONFIGURATION
+# --------------------------
+# Change these values as needed
+$SearchName = "PhishingEmailRemoval"
+$SearchQuery = 'subject:"Your Account Has Been Suspended"'  # Example subject line
+# Alternative example to target by sender:
+# $SearchQuery = 'from:"phisher@bad-domain.com"'
+
+# --------------------------
+# STEP 1: Create Compliance Search
+# --------------------------
+New-ComplianceSearch -Name $SearchName -ExchangeLocation All -ContentMatchQuery $SearchQuery
+
+# --------------------------
+# STEP 2: Start the Search
+# --------------------------
+Start-ComplianceSearch -Identity $SearchName
+
+Write-Host "Search started. Waiting for results..." -ForegroundColor Yellow
+Start-Sleep -Seconds 60   # wait 1 min (increase if many mailboxes)
+
+# --------------------------
+# STEP 3: Verify Results
+# --------------------------
+Get-ComplianceSearch -Identity $SearchName | Format-List Name,Status,Items
+
+# --------------------------
+# STEP 4: Purge Messages
+# --------------------------
+# Choose one:
+#   SoftDelete = moves to Deletions folder (recoverable)
+#   HardDelete = permanently deletes
+New-ComplianceSearchAction -SearchName $SearchName -Purge -PurgeType HardDelete
+
+Write-Host "Purge action submitted. It may take several hours to complete." -ForegroundColor Green
