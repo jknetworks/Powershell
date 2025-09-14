@@ -1,6 +1,5 @@
 #RUN AS ADMINISTRATOR
 
-# Run the disk assessment
 $results = & winsat disk -drive c | Out-String
 
 # Extract the sequential read speed
@@ -20,3 +19,8 @@ if ($results -match "Disk Sequential 64.0 Write\s*:\s*(\d+(\.\d+)?) MB/s") {
 # Output results
 Write-Output "Sequential Read Speed: $readSpeed MB/s"
 Write-Output "Sequential Write Speed: $writeSpeed MB/s"
+
+
+### Run full disk assessment with winsat to XML file###
+### Results C:\Windows\Performance\WinSAT\DataStore\ ###
+winsat formal -restart
