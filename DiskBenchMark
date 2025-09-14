@@ -1,0 +1,7 @@
+#RUN AS ADMINISTRATOR
+
+$results = winsat disk -drive c | Out-String
+$read = ($results -split "`n" | Where-Object {$_ -match "Disk Sequential 64.0 Read"}) -replace ".*Read: (\d+) MB/s.*",'$1'
+$write = ($results -split "`n" | Where-Object {$_ -match "Disk Sequential 64.0 Write"}) -replace ".*Write: (\d+) MB/s.*",'$1'
+Write-Output "Sequential Read Speed: $read MB/s"
+Write-Output "Sequential Write Speed: $write MB/s"
