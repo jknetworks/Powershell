@@ -1,0 +1,24 @@
+# Disk Cleanup Script for Windows
+Write-Host "Starting cleanup..." -ForegroundColor Cyan
+
+# Clean temp files
+Remove-Item -Path "$env:TEMP\*" -Recurse -Force -ErrorAction SilentlyContinue
+Write-Host "✔ Temporary files cleared."
+
+# Clean Windows Update cache
+Stop-Service wuauserv -Force
+Remove-Item "C:\Windows\SoftwareDistribution\Download\*" -Recurse -Force -ErrorAction SilentlyContinue
+Start-Service wuauserv
+Write-Host "✔ Windows Update cache cleared."
+
+# Clean Recycle Bin
+Clear-RecycleBin -Force -ErrorAction SilentlyContinue
+Write-Host "✔ Recycle Bin emptied."
+
+# Clean system temp folders
+Remove-Item "C:\Windows\Temp\*" -Recurse -Force -ErrorAction SilentlyContinue
+Write-Host "✔ System temp folder cleared."
+
+# Check remaining free space
+$freeSpace = [math]::Round((Get-PSDrive C).Free / 1GB, 2)
+Write-Host "`nCleanup complete. Free space remaining: $freeSpace GB" -ForegroundColor Green
