@@ -1,0 +1,44 @@
+# Windows 11 Readiness Check
+Write-Host "Checking Windows 11 Requirements..." -ForegroundColor Cyan
+
+# Check TPM
+$tpm = Get-WmiObject -Namespace "Root\CIMV2\Security\MicrosoftTpm" -Class Win32_Tpm -ErrorAction SilentlyContinue
+if ($tpm -and $tpm.SpecVersion -match "2.0") {
+    Write-Host "✔ TPM 2.0 is present and ready." -ForegroundColor Green
+} else {
+    Write-Host "✖ TPM 2.0 not found or not enabled." -ForegroundColor Red
+}
+
+# Check Secure Boot
+$secureBoot = Confirm-SecureBootUEFI -ErrorAction SilentlyContinue
+if ($secureBoot -eq $true) {
+    Write-Host "✔ Secure Boot is enabled." -ForegroundColor Green
+} else {
+    Write-Host "✖ Secure Boot is disabled." -ForegroundColor Red
+}
+
+# Check CPU
+$cpu = Get-CimInstance Win32_Processor
+if ($cpu.Name -match "Intel\(R\).*Core\(TM\) i[5-9]-8") {
+    Write-Host "✔ CPU ($($cpu.Name)) meets Windows 11 requirement." -ForegroundColor Green
+} else {
+    Write-Host "✖ CPU ($($cpu.Name)) may not meet Windows 11 requirement." -ForegroundColor Red
+}
+
+# Check RAM
+$ramGB = [math]::Round((Get-CimInstance Win32_ComputerSystem).TotalPhysicalMemory / 1GB)
+if ($ramGB -ge 4) {
+    Write-Host "✔ RAM: $ramGB GB available." -ForegroundColor Green
+} else {
+    Write-Host "✖ Only $ramGB GB RAM available. Minimum is 4 GB." -ForegroundColor Red
+}
+
+# Check free disk space
+$disk = Get-PSDrive C
+if ($disk.Free -ge 20GB) {
+    Write-Host "✔ Disk space: $([math]::Round($disk.Free/1GB)) GB free." -ForegroundColor Green
+} else {
+    Write-Host "✖ Only $([math]::Round($disk.Free/1GB)) GB free. At least 20 GB recommended." -ForegroundColor Red
+}
+
+Write-Host "`nWindows 11 Readiness Check complete." -ForegroundColor Cyan
