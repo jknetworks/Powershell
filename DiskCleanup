@@ -1,24 +1,60 @@
-# Disk Cleanup Script for Windows
-Write-Host "Starting cleanup..." -ForegroundColor Cyan
+# Windows Full Cleanup Script
+Write-Host "Starting full cleanup..." -ForegroundColor Cyan
 
-# Clean temp files
-Remove-Item -Path "$env:TEMP\*" -Recurse -Force -ErrorAction SilentlyContinue
-Write-Host "✔ Temporary files cleared."
+# Function for safe directory cleanup
+function Safe-Clean {
+    param($Path, $Description)
+    if (Test-Path $Path) {
+        try {
+            Remove-Item -Path $Path -Recurse -Force -ErrorAction Stop
+            Write-Host "✔ $Description removed."
+        } catch {
+            Write-Host "⚠ Unable to remove $Description ($Path). Try running as Administrator." -ForegroundColor Yellow
+        }
+    } else {
+        Write-Host "ℹ $Description not found."
+    }
+}
+
+# Clean temporary files
+Safe-Clean "$env:TEMP\*" "User temp files"
+Safe-Clean "C:\Windows\Temp\*" "Windows temp files"
 
 # Clean Windows Update cache
-Stop-Service wuauserv -Force
-Remove-Item "C:\Windows\SoftwareDistribution\Download\*" -Recurse -Force -ErrorAction SilentlyContinue
+Write-Host "Cleaning Windows Update cache..."
+Stop-Service wuauserv -Force -ErrorAction SilentlyContinue
+Safe-Clean "C:\Windows\SoftwareDistribution\Download\*" "Windows Update cache"
 Start-Service wuauserv
-Write-Host "✔ Windows Update cache cleared."
 
-# Clean Recycle Bin
-Clear-RecycleBin -Force -ErrorAction SilentlyContinue
-Write-Host "✔ Recycle Bin emptied."
+# Clean Delivery Optimization cache
+Safe-Clean "C:\Windows\ServiceProfiles\NetworkService\AppData\Local\Microsoft\Windows\DeliveryOptimization\Cache\*" "Delivery Optimization cache"
 
-# Clean system temp folders
-Remove-Item "C:\Windows\Temp\*" -Recurse -Force -ErrorAction SilentlyContinue
-Write-Host "✔ System temp folder cleared."
+# Empty Recycle Bin
+try {
+    Clear-RecycleBin -Force -ErrorAction Stop
+    Write-Host "✔ Recycle Bin emptied."
+} catch {
+    Write-Host "⚠ Unable to empty Recycle Bin (may require admin privileges)." -ForegroundColor Yellow
+}
 
-# Check remaining free space
+# Remove old Windows installation files (Windows.old)
+Write-Host "`nChecking for old Windows installation files..."
+if (Test-Path "C:\Windows.old") {
+    try {
+        Remove-Item "C:\Windows.old" -Recurse -Force -ErrorAction Stop
+        Write-Host "✔ Old Windows installation (Windows.old) removed." -ForegroundColor Green
+    } catch {
+        Write-Host "⚠ Unable to delete Windows.old automatically. You can remove it via Disk Cleanup (Cleanmgr)." -ForegroundColor Yellow
+    }
+} else {
+    Write-Host "ℹ No Windows.old folder found."
+}
+
+# Clean temporary log files
+Safe-Clean "C:\Windows\Logs\CBS\*" "Windows Component logs"
+Safe-Clean "C:\Windows\Logs\DISM\*" "DISM logs"
+
+# Show free space summary
 $freeSpace = [math]::Round((Get-PSDrive C).Free / 1GB, 2)
-Write-Host "`nCleanup complete. Free space remaining: $freeSpace GB" -ForegroundColor Green
+Write-Host "`nCleanup complete! Free space remaining: $freeSpace GB" -ForegroundColor Green
+Write-Host "You can now safely proceed with a Windows 11 upgrade if all requirements are met." -ForegroundColor Cyan
