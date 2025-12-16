@@ -1,0 +1,9 @@
+### FILE AND PRINT SHARING ###
+## NETSHELL ##
+netsh advfirewall firewall set rule group="File and Printer Sharing" new enable=Yes
+netsh advfirewall firewall set rule group="Network Discovery" new enable=Yes
+## POWERSHELL ##
+Set-NetFirewallRule -DisplayGroup "File And Printer Sharing" -Enabled True
+
+
+
