@@ -12,5 +12,6 @@ Set-NetConnectionProfile -InterfaceAlias "YourNetworkName" -NetworkCategory Priv
 Set-NetConnectionProfile -InterfaceIndex 1 -NetworkCategory Private
 
 ### Troubleshoot ###
+Get-SmbClientConfiguration
 Set-SmbClientConfiguration -RequireSecuritySignature $false
 Set-SmbClientConfiguration -EnableInsecureGuestLogons $true
