@@ -6,8 +6,11 @@ netsh advfirewall firewall set rule group="Network Discovery" new enable=Yes
 Set-NetFirewallRule -DisplayGroup "File And Printer Sharing" -Enabled True
 
 
-###Network Profile###
+### Network Profile ###
 Get-NetConnectionProfile
 Set-NetConnectionProfile -InterfaceAlias "YourNetworkName" -NetworkCategory Private
 Set-NetConnectionProfile -InterfaceIndex 1 -NetworkCategory Private
 
+### Troubleshoot ###
+Set-SmbClientConfiguration -RequireSecuritySignature $false
+Set-SmbClientConfiguration -EnableInsecureGuestLogons $true
