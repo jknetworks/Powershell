@@ -42,3 +42,9 @@ SMB1
 Get-WindowsOptionalFeature -Online -FeatureName SMB1Protocol
 Disable-WindowsOptionalFeature -Online -FeatureName SMB1Protocol
 Enable-WindowsOptionalFeature -Online -FeatureName SMB1Protocol
+
+Get-SmbServerConfiguration | Select EnableSMB1Protocol
+Set-SmbServerConfiguration -EnableSMB1Protocol $false
+Set-SmbServerConfiguration -EnableSMB1Protocol $true
+
+https://learn.microsoft.com/en-us/windows-server/storage/file-server/troubleshoot/detect-enable-and-disable-smbv1-v2-v3?tabs=server
