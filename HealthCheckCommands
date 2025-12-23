@@ -1,0 +1,76 @@
+Get-ComputerInfo | Select OSName, OSVersion, WindowsBuildLabEx
+
+Get-HotFix | Sort InstalledOn -Descending | Select -First 10
+
+(Get-ItemProperty "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Component Based Servicing\RebootPending" -ErrorAction SilentlyContinue) -ne $null
+
+# Server Roles
+Get-WindowsFeature | Where-Object {$_.Installed -eq $true}
+
+
+# Performance and Resource Utilization
+Get-Counter '\Processor(_Total)\% Processor Time'
+
+Get-Counter '\Memory\Available MBytes'
+
+Get-PSDrive -PSProvider FileSystem | Select Name, Used, Free
+
+# Disk & Volume Health
+Get-Volume | Select DriveLetter, FileSystem, HealthStatus, SizeRemaining
+
+Get-PhysicalDisk | Select FriendlyName, HealthStatus, OperationalStatus
+
+# AD Health
+repadmin /replsummary
+
+netdom query fsmo
+
+dcdiag /test:sysvolcheck /test:advertising
+
+# DNS and DHCP
+Get-DnsServerForwarder
+
+Get-DnsServerZone | Select ZoneName, IsAutoCreated, IsDsIntegrated
+
+Get-DhcpServerv4Scope | ForEach-Object {  Get-DhcpServerv4ScopeStatistics -ScopeId $_.ScopeId }
+
+# Security
+Get-MpComputerStatus
+
+Get-NetFirewallProfile | Select Name, Enabled
+
+Get-SmbServerConfiguration | Select EnableSMB1Protocol, EnableSMB2Protocol
+
+# Group Policy
+gpresult /r
+
+dcdiag /test:gpo
+
+# Windows Client
+Get-ComputerInfo | Select OSName, OSVersion, WindowsBuildLabEx
+
+Get-HotFix | Sort InstalledOn -Descending | Select -First 5
+
+Get-MpComputerStatus | Select AMServiceEnabled, RealTimeProtectionEnabled
+
+Get-BitLockerVolume | Select MountPoint, ProtectionStatus
+
+Get-NetIPConfiguration
+
+Get-DnsClientServerAddress
+
+Get-LocalGroupMember -Group "Administrators"
+
+Get-Volume | Select DriveLetter, HealthStatus, SizeRemaining
+
+gpresult /r
+
+
+# Script
+$Computers = Get-ADComputer -Filter * | Select -Expand Name
+
+Invoke-Command -ComputerName $Computers -ScriptBlock {
+    Get-ComputerInfo | Select CsName, OSName, OSVersion
+    Get-MpComputerStatus | Select RealTimeProtectionEnabled
+    Get-BitLockerVolume
+} | Export-Csv C:\HealthCheck\ClientResults.csv -NoTypeInformation
