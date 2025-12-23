@@ -1,0 +1,169 @@
+# ================================
+# Windows Network Health Check
+# Server 2022 + Windows 11 Clients
+# ================================
+
+$Date = Get-Date -Format "yyyy-MM-dd_HH-mm"
+$ReportRoot = "C:\HealthCheck_$Date"
+New-Item -ItemType Directory -Path $ReportRoot -Force | Out-Null
+
+# ----------------
+# Helper Function
+# ----------------
+function Write-Section {
+    param ($Title)
+    "`n=====================`n$Title`n=====================" |
+        Out-File "$ReportRoot\Summary.txt" -Append
+}
+
+# ----------------
+# Server Information
+# ----------------
+Write-Section "Server OS Information"
+
+$ServerInfo = Get-ComputerInfo |
+    Select CsName, OSName, OSVersion, WindowsBuildLabEx, CsDomain
+
+$ServerInfo | Out-File "$ReportRoot\Summary.txt" -Append
+
+$ServerInfo | Export-Csv "$ReportRoot\Server_OS.csv" -NoTypeInformation
+
+# ----------------
+# Patch Status
+# ----------------
+Write-Section "Recent Patches"
+
+Get-HotFix |
+Sort InstalledOn -Descending |
+Select -First 10 |
+Out-File "$ReportRoot\Summary.txt" -Append
+
+# ----------------
+# Pending Reboot
+# ----------------
+Write-Section "Pending Reboot Check"
+
+$RebootPending = Test-Path "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Component Based Servicing\RebootPending"
+"Pending Reboot: $RebootPending" |
+Out-File "$ReportRoot\Summary.txt" -Append
+
+# ----------------
+# Installed Roles
+# ----------------
+Write-Section "Installed Server Roles"
+
+Get-WindowsFeature |
+Where Installed -eq $true |
+Select Name, DisplayName |
+Out-File "$ReportRoot\Summary.txt" -Append
+
+# ----------------
+# Disk Health
+# ----------------
+Write-Section "Disk & Volume Health"
+
+Get-Volume |
+Select DriveLetter, FileSystem, HealthStatus, SizeRemaining |
+Out-File "$ReportRoot\Summary.txt" -Append
+
+# ----------------
+# Defender & Firewall
+# ----------------
+Write-Section "Security Status"
+
+Get-MpComputerStatus |
+Select AMServiceEnabled, RealTimeProtectionEnabled |
+Out-File "$ReportRoot\Summary.txt" -Append
+
+Get-NetFirewallProfile |
+Select Name, Enabled |
+Out-File "$ReportRoot\Summary.txt" -Append
+
+# ----------------
+# SMB Protocols
+# ----------------
+Write-Section "SMB Configuration"
+
+Get-SmbServerConfiguration |
+Select EnableSMB1Protocol, EnableSMB2Protocol |
+Out-File "$ReportRoot\Summary.txt" -Append
+
+# ----------------
+# Active Directory Checks (If DC)
+# ----------------
+if (Get-Service NTDS -ErrorAction SilentlyContinue) {
+
+    Write-Section "Active Directory Health"
+
+    "FSMO Roles:" | Out-File "$ReportRoot\Summary.txt" -Append
+    netdom query fsmo | Out-File "$ReportRoot\Summary.txt" -Append
+
+    "Replication Summary:" | Out-File "$ReportRoot\Summary.txt" -Append
+    repadmin /replsummary | Out-File "$ReportRoot\Summary.txt" -Append
+}
+
+# ----------------
+# DNS Checks (If Installed)
+# ----------------
+if (Get-Service DNS -ErrorAction SilentlyContinue) {
+
+    Write-Section "DNS Configuration"
+
+    Get-DnsServerForwarder |
+    Out-File "$ReportRoot\Summary.txt" -Append
+}
+
+# ----------------
+# DHCP Checks (If Installed)
+# ----------------
+if (Get-Service DHCPServer -ErrorAction SilentlyContinue) {
+
+    Write-Section "DHCP Scope Utilization"
+
+    Get-DhcpServerv4Scope |
+    ForEach-Object {
+        Get-DhcpServerv4ScopeStatistics -ScopeId $_.ScopeId
+    } | Out-File "$ReportRoot\Summary.txt" -Append
+}
+
+# ----------------
+# Client Health Checks
+# ----------------
+Write-Section "Windows 11 Client Health"
+
+Import-Module ActiveDirectory
+
+$Clients = Get-ADComputer -Filter {
+    OperatingSystem -like "*Windows 11*"
+} | Select -Expand Name
+
+$ClientResults = Invoke-Command -ComputerName $Clients -ScriptBlock {
+
+    $OS = Get-ComputerInfo | Select OSName, OSVersion
+    $AV = Get-MpComputerStatus | Select RealTimeProtectionEnabled
+    $BL = Get-BitLockerVolume -MountPoint "C:" -ErrorAction SilentlyContinue
+
+    [PSCustomObject]@{
+        ComputerName = $env:COMPUTERNAME
+        OS           = $OS.OSName
+        OSVersion    = $OS.OSVersion
+        DefenderOn   = $AV.RealTimeProtectionEnabled
+        BitLocker    = $BL.ProtectionStatus
+    }
+}
+
+$ClientResults |
+Export-Csv "$ReportRoot\Client_Health.csv" -NoTypeInformation
+
+$ClientResults |
+Out-File "$ReportRoot\Summary.txt" -Append
+
+# ----------------
+# Completion
+# ----------------
+Write-Section "Health Check Completed"
+"Report Location: $ReportRoot" |
+Out-File "$ReportRoot\Summary.txt" -Append
+
+Write-Host "Health check complete."
+Write-Host "Reports saved to $ReportRoot"
