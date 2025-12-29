@@ -1,0 +1,31 @@
+# Check for Administrator privileges
+if (!([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole] "Administrator")) {
+    Write-Warning "You must run this script as an Administrator!"
+    Break
+}
+
+Write-Host "Configuring Remote Desktop Settings..." -ForegroundColor Cyan
+
+# 1. Enable Remote Desktop (fDenyTSConnections = 0)
+Write-Host "1. Enabling RDP Connections..."
+Set-ItemProperty -Path 'HKLM:\System\CurrentControlSet\Control\Terminal Server' -name "fDenyTSConnections" -value 0
+
+# 2. Enable Network Level Authentication (NLA) for security
+# This requires the connecting user to authenticate before a session is created.
+Write-Host "2. Enforcing Network Level Authentication (NLA)..."
+(Get-WmiObject -Class "Win32_TSGeneralSetting" -Namespace root\cimv2\terminalservices -Filter "TerminalName='RDP-tcp'").SetUserAuthenticationRequired(1)
+
+# 3. Enable Windows Firewall Rules for RDP
+Write-Host "3. Allowing RDP through Windows Firewall..."
+Enable-NetFirewallRule -DisplayGroup "Remote Desktop"
+
+# 4. Set Sleep Timeout to 'Never' (0) while plugged in (AC Power)
+# This prevents the PC from going to sleep and cutting off your connection.
+Write-Host "4. Disabling Sleep Mode (AC Power)..."
+powercfg -change -standby-timeout-ac 0
+
+Write-Host "----------------------------------------------"
+Write-Host "Configuration Complete." -ForegroundColor Green
+Write-Host "REMINDER: Ensure the local user account has a password set." -ForegroundColor Yellow
+Write-Host "----------------------------------------------"
+Pause
