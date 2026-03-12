@@ -2,7 +2,7 @@
 powercfg /duplicatescheme SCHEME_MIN
 
 #Rename New Plan (Insert correct GUID)
-powercfg /changename 39159498-c1af-4673-9330-60f2ad61ff3b "VM Always On" 
+powercfg /changename 39159498-c1af-4673-9330-60f2ad61ff3b "Always On" 
 
 # Disable Hibernation
 powercfg /hibernate off
