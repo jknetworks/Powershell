@@ -1,0 +1,55 @@
+# Dublicate Scheme
+powercfg /duplicatescheme SCHEME_MIN
+
+#Rename New Plan (Insert correct GUID)
+powercfg /changename 39159498-c1af-4673-9330-60f2ad61ff3b "VM Always On" 
+
+# Disable Hibernation
+powercfg /hibernate off
+
+# Set High Performance Power Plan
+powercfg /setactive SCHEME_MIN
+
+# Disable Sleep / Hibernate timers
+powercfg /change standby-timeout-ac 0
+powercfg /change hibernate-timeout-ac 0
+
+# Disable Monitor timeout
+powercfg /change monitor-timeout-ac 0
+
+# Disable Disk Power Down
+powercfg /change disk-timeout-ac 0
+
+# Disable USB Selective Suspend
+## powercfg /setacvalueindex SCHEME_CURRENT SUB_USB USBSELECTIVE SUSPEND 0
+powercfg /setacvalueindex SCHEME_CURRENT 2a737441-1930-4402-8d77-b2bebba308a3 48e6b7a6-50f5-4782-a5d4-53bb8f07e226 0
+powercfg /setactive SCHEME_CURRENT
+
+# Disable PCIe Link State Power Management
+powercfg /setacvalueindex SCHEME_CURRENT SUB_PCIEXPRESS ASPM 0
+
+# Set CPU Minimum and Maximum to 100%
+powercfg /setacvalueindex SCHEME_CURRENT SUB_PROCESSOR PROCTHROTTLEMIN 100
+powercfg /setacvalueindex SCHEME_CURRENT SUB_PROCESSOR PROCTHROTTLEMAX 100
+
+# Disable Hybrid Sleep
+powercfg /setacvalueindex SCHEME_CURRENT SUB_SLEEP HYBRIDSLEEP 0
+
+# Apply settings
+powercfg /setactive SCHEME_CURRENT
+
+# Query settings
+powercfg /a
+
+powercfg /query
+
+powercfg /list
+
+# Export settings
+powercfg /export C:\Temp\AlwaysOn.pow <GUID>
+
+# Import settings
+powercfg /import C:\Temp\AlwaysOn.pow
+
+# Sleep requests
+powercfg /requests
