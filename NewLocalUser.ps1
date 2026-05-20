@@ -31,5 +31,5 @@ Set-LocalUser `
 
 Write-Host "Local administrator account '$Username' created successfully."
 
-
+# Check Administrators Group
 Get-LocalGroupMember -Group "Administrators"
