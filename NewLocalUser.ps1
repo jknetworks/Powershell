@@ -1,3 +1,11 @@
+# Check Script Policy
+Get-ExecutionPolicy
+
+# Set Script Policy
+Set-ExecutionPolicy Unrestricted
+Set-ExecutionPolicy Restricted
+
+
 # Prompt for username
 $Username = Read-Host "Enter the new local username"
 
@@ -22,3 +30,6 @@ Set-LocalUser `
     -PasswordNeverExpires $true
 
 Write-Host "Local administrator account '$Username' created successfully."
+
+
+Get-LocalGroupMember -Group "Administrators"
