@@ -1,0 +1,81 @@
+# ==========================================
+# Azure AD / Entra ID Join Script
+# ==========================================
+
+# Verify running as Administrator
+If (-NOT ([Security.Principal.WindowsPrincipal] `
+    [Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole(`
+    [Security.Principal.WindowsBuiltInRole] "Administrator"))
+{
+    Write-Host "Please run PowerShell as Administrator." -ForegroundColor Red
+    Exit
+}
+
+Write-Host ""
+Write-Host "Preparing system for Azure AD Join..." -ForegroundColor Cyan
+
+# Optional: Rename computer
+$Rename = Read-Host "Do you want to rename this computer before joining? (Y/N)"
+
+if ($Rename -eq "Y")
+{
+    $NewName = Read-Host "Enter new computer name"
+
+    try
+    {
+        Rename-Computer -NewName $NewName -Force
+        Write-Host "Computer renamed successfully." -ForegroundColor Green
+        $NeedsReboot = $true
+    }
+    catch
+    {
+        Write-Host "Failed to rename computer: $_" -ForegroundColor Red
+    }
+}
+
+# Check internet connectivity
+Write-Host ""
+Write-Host "Checking internet connectivity..." -ForegroundColor Cyan
+
+try
+{
+    Test-Connection login.microsoftonline.com -Count 2 -Quiet -ErrorAction Stop | Out-Null
+    Write-Host "Internet connectivity OK." -ForegroundColor Green
+}
+catch
+{
+    Write-Host "Unable to reach Microsoft 365 services." -ForegroundColor Red
+    Exit
+}
+
+# Show current join status
+Write-Host ""
+Write-Host "Current Device Registration Status:" -ForegroundColor Cyan
+
+dsregcmd /status
+
+# Launch Azure AD Join UI
+Write-Host ""
+Write-Host "Launching Azure AD Join window..." -ForegroundColor Cyan
+
+Start-Process "ms-settings:workplace"
+
+Write-Host ""
+Write-Host "Next Steps:" -ForegroundColor Yellow
+Write-Host "1. Click 'Connect'"
+Write-Host "2. Select 'Join this device to Microsoft Entra ID'"
+Write-Host "3. Sign in with Microsoft 365 credentials"
+Write-Host "4. Complete MFA if required"
+Write-Host "5. Reboot when prompted"
+
+# Optional reboot if renamed
+if ($NeedsReboot)
+{
+    Write-Host ""
+    $Reboot = Read-Host "Computer rename requires reboot. Reboot now? (Y/N)"
+
+    if ($Reboot -eq "Y")
+    {
+        Restart-Computer -Force
+    }
+}
