@@ -1,0 +1,97 @@
+# ==========================================
+# Azure AD / Entra ID Unjoin Script
+# ==========================================
+
+# Verify running as Administrator
+If (-NOT ([Security.Principal.WindowsPrincipal] `
+    [Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole(`
+    [Security.Principal.WindowsBuiltInRole] "Administrator"))
+{
+    Write-Host "Please run PowerShell as Administrator." -ForegroundColor Red
+    Exit
+}
+
+Write-Host ""
+Write-Host "Checking Azure AD Join Status..." -ForegroundColor Cyan
+
+# Check Azure AD Join Status
+$dsreg = dsregcmd /status
+
+if ($dsreg -match "AzureAdJoined\s*:\s*YES")
+{
+    Write-Host "Computer is Azure AD joined." -ForegroundColor Green
+}
+else
+{
+    Write-Host "Computer is NOT Azure AD joined." -ForegroundColor Yellow
+    Exit
+}
+
+# ==========================================
+# OPTIONAL SAFETY STEP
+# Create local admin account
+# ==========================================
+
+$CreateLocalAdmin = Read-Host "Create a local admin account before disconnecting? (Y/N)"
+
+if ($CreateLocalAdmin -eq "Y")
+{
+    $LocalUser = Read-Host "Enter local admin username"
+    $Password = Read-Host "Enter password" -AsSecureString
+
+    try {
+        New-LocalUser `
+            -Name $LocalUser `
+            -Password $Password `
+            -FullName $LocalUser `
+            -Description "Local Administrator Account" `
+            -ErrorAction Stop
+
+        Add-LocalGroupMember `
+            -Group "Administrators" `
+            -Member $LocalUser `
+            -ErrorAction Stop
+
+        Write-Host "Local administrator account created successfully." -ForegroundColor Green
+    }
+    catch {
+        Write-Host "Error creating local admin account: $_" -ForegroundColor Red
+    }
+}
+
+# ==========================================
+# Disconnect Azure AD
+# ==========================================
+
+Write-Host ""
+Write-Host "Disconnecting from Azure AD..." -ForegroundColor Cyan
+
+try
+{
+    dsregcmd /leave
+
+    Write-Host ""
+    Write-Host "Azure AD disconnect command completed." -ForegroundColor Green
+}
+catch
+{
+    Write-Host "An error occurred during disconnect." -ForegroundColor Red
+    Write-Host $_
+    Exit
+}
+
+# ==========================================
+# Reboot Prompt
+# ==========================================
+
+Write-Host ""
+$Reboot = Read-Host "Reboot now? (Y/N)"
+
+if ($Reboot -eq "Y")
+{
+    Restart-Computer -Force
+}
+else
+{
+    Write-Host "Please reboot the computer manually to complete the process." -ForegroundColor Yellow
+}
