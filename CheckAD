@@ -1,0 +1,93 @@
+# Check Windows Domain/Azure AD Join Status + Local Users & Groups
+# Run in an elevated PowerShell prompt for best results
+# Output is saved to a text file AND displayed on screen simultaneously
+
+# --- Output File Setup ---
+$outputFile = "$env:USERPROFILE\Desktop\ComputerReport_$env:COMPUTERNAME`_$(Get-Date -Format 'yyyyMMdd_HHmmss').txt"
+Start-Transcript -Path $outputFile -NoClobber
+Write-Host "Report saving to: $outputFile`n" -ForegroundColor DarkGray
+
+# -------------------------------------------------------
+
+Write-Host "`n=== Computer Join Status ===" -ForegroundColor Cyan
+Write-Host "Computer Name : $env:COMPUTERNAME"
+Write-Host "Logged-in User: $env:USERDOMAIN\$env:USERNAME"
+Write-Host "Report Date   : $(Get-Date -Format 'yyyy-MM-dd HH:mm:ss')`n"
+
+# --- Method 1: WMI (On-Premises AD / Workgroup) ---
+$cs = Get-CimInstance -ClassName Win32_ComputerSystem
+Write-Host "WMI Domain    : $($cs.Domain)"
+Write-Host "Part of Domain: $($cs.PartOfDomain)`n"
+
+# --- Method 2: dsregcmd (Azure AD / Hybrid) ---
+Write-Host "=== Azure AD / Hybrid Join Status (dsregcmd) ===" -ForegroundColor Cyan
+$dsreg = dsregcmd /status
+
+$azureJoined     = ($dsreg | Select-String "AzureAdJoined\s*:\s*YES")   -ne $null
+$domainJoined    = ($dsreg | Select-String "DomainJoined\s*:\s*YES")    -ne $null
+$workplaceJoined = ($dsreg | Select-String "WorkplaceJoined\s*:\s*YES") -ne $null
+
+Write-Host "Azure AD Joined   : $azureJoined"
+Write-Host "On-Prem AD Joined : $domainJoined"
+Write-Host "Workplace Joined  : $workplaceJoined"
+
+# --- Determine Join Type ---
+Write-Host "`n=== Conclusion ===" -ForegroundColor Green
+if ($azureJoined -and $domainJoined) {
+    Write-Host "Status: HYBRID JOINED (Azure AD + On-Premises AD)" -ForegroundColor Yellow
+} elseif ($azureJoined) {
+    Write-Host "Status: AZURE AD JOINED only" -ForegroundColor Blue
+} elseif ($domainJoined) {
+    Write-Host "Status: ON-PREMISES AD JOINED" -ForegroundColor Magenta
+    Write-Host "Domain: $($cs.Domain)"
+} elseif ($workplaceJoined) {
+    Write-Host "Status: WORKPLACE JOINED (Azure AD Registered)" -ForegroundColor DarkYellow
+} else {
+    Write-Host "Status: WORKGROUP (not joined to any domain)" -ForegroundColor Red
+    Write-Host "Workgroup: $($cs.Domain)"
+}
+
+# --- Local Users ---
+Write-Host "`n=== Local User Accounts ===" -ForegroundColor Cyan
+
+$users = Get-LocalUser | Select-Object Name, Enabled, LastLogon, PasswordLastSet,
+    @{Name="AccountSource"; Expression={
+        if ($_.PrincipalSource -eq "Local")               { "Local" }
+        elseif ($_.PrincipalSource -eq "MicrosoftAccount") { "Microsoft Account" }
+        elseif ($_.PrincipalSource -eq "AzureAD")         { "Azure AD" }
+        else                                               { $_.PrincipalSource }
+    }}
+
+$users | Format-Table -AutoSize
+
+$currentUser = $env:USERNAME
+Write-Host "  (* '$currentUser' is the currently logged-in user)" -ForegroundColor DarkGray
+
+# --- Local Groups ---
+Write-Host "`n=== Local Groups ===" -ForegroundColor Cyan
+
+$groups = Get-LocalGroup | Sort-Object Name
+foreach ($group in $groups) {
+    Write-Host "`n  [$($group.Name)]" -ForegroundColor Yellow
+    Write-Host "  Description: $($group.Description)"
+
+    try {
+        $members = Get-LocalGroupMember -Group $group.Name -ErrorAction Stop
+        if ($members) {
+            foreach ($member in $members) {
+                $source = if ($member.PrincipalSource) { " ($($member.PrincipalSource))" } else { "" }
+                Write-Host "    - $($member.Name)$source"
+            }
+        } else {
+            Write-Host "    (no members)" -ForegroundColor DarkGray
+        }
+    } catch {
+        Write-Host "    (could not enumerate members: $($_.Exception.Message))" -ForegroundColor DarkGray
+    }
+}
+
+Write-Host "`n=== Scan Complete ===" -ForegroundColor Green
+Write-Host "Report saved to: $outputFile`n" -ForegroundColor DarkGray
+
+# --- Stop Transcript ---
+Stop-Transcript
