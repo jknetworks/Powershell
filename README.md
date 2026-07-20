@@ -1,2 +1,2 @@
 # Powershell
-Useful Powershell Scripts for Administration
+Powershell Scripts for Administration
