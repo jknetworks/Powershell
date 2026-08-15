@@ -1,4 +1,4 @@
-#RENAME COMPUTER AND WORKGROUP
+###RENAME COMPUTER AND WORKGROUP
 ```powershell
 Add-Computer -WorkGroupName "Name"
 ```
