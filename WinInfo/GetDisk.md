@@ -1,7 +1,7 @@
 ```powershell
 Get-Disk | ConvertTo-Html -Title 'Disk Information' | Set-Content E:\DiskReport.htm 
-```
 Get-Disk | Export-Csv -NoTypeInformation -Path E:\DiskReport.csv
+```
 
 $Disks = Get-Disk
 $Disks | ConvertTo-Html -Title 'Disk Information' | Set-Content E:\DiskReport.htm
