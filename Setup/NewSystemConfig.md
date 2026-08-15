@@ -1,6 +1,10 @@
 #RENAME COMPUTER AND WORKGROUP
+```powershell
 Add-Computer -WorkGroupName "Name"
+```
+
 Rename-Computer -NewName "Name"
+
 Restart-Computer -Force
 
 
