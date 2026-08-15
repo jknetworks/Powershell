@@ -4,7 +4,7 @@ Get-Disk | ConvertTo-Html -Title 'Disk Information' | Set-Content E:\DiskReport.
 ```powershell
 Get-Disk | Export-Csv -NoTypeInformation -Path E:\DiskReport.csv
 ```
-####
+**OR**
 
 ```powershell
 $Disks = Get-Disk
