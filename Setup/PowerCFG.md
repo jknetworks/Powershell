@@ -1,6 +1,10 @@
 # Set active plan to High Performance (create if not present)
+```powershell
 powercfg -duplicatescheme 8c5e7fda-e8bf-4a96-9a85-a6e23a8c635c
+```
+```powershell
 powercfg -setactive 8c5e7fda-e8bf-4a96-9a85-a6e23a8c635c
+```
 
 # Disable sleep (AC + DC)
 powercfg -change -standby-timeout-ac 0
