@@ -1,16 +1,14 @@
+```powershell
+# Allow the module to load for this session (avoids "running scripts is disabled" error)
+Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope Process -Force
+
 # Install PSWindowsUpdate module if not present
-```powershell
 Install-PackageProvider -Name NuGet -Force
-```
-```powershell
 Install-Module PSWindowsUpdate -Force
-```
-```powershell
 Import-Module PSWindowsUpdate
-```
-```powershell
+
 Get-WindowsUpdate
-```
-```powershell
 Install-WindowsUpdate -AcceptAll -AutoReboot
 ```
+
+Repeat `Install-WindowsUpdate` after each reboot until `Get-WindowsUpdate` returns nothing — first pass often only surfaces the cumulative update needed before others will show.
