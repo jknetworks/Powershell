@@ -1,7 +1,7 @@
 #TOP FIVE
 
 ```powershell
-echo %LOGONSERVER%
+whoami /fqdn
 ```
 
 ```powershell
