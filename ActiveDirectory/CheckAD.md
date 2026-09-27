@@ -24,6 +24,10 @@ gpupdate /force
 #FULL LIST
 
 ```powershell
+(Get-CimInstance Win32_ComputerSystem).Domain
+```
+
+```powershell
 echo %LOGONSERVER%
 ```
 
