@@ -15,10 +15,10 @@ Get-NetAdapterAdvancedProperty -Name "Ethernet*" | Where-Object { $_.DisplayName
 ```
 <details>
 <summary>On adapter disable energy savings</summary>  
-Energy Efficient Ethernet (EEE) → Disabled\
-Green Ethernet → Disabled\
-Power Saving Mode → Disabled\
-Gigabit Lite (if listed) → Disabled\
-Auto Disable Gigabit (if listed) → Disabled\
-Idle Power Saving (if present) → Disabled\
+Energy Efficient Ethernet (EEE) → Disabled<br>
+Green Ethernet → Disabled<br>
+Power Saving Mode → Disabled<br>
+Gigabit Lite (if listed) → Disabled<br>
+Auto Disable Gigabit (if listed) → Disabled<br>
+Idle Power Saving (if present) → Disabled<br>
 </details>
