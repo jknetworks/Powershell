@@ -9,12 +9,12 @@ robocopy "C:\Source\Folder" "\\192.168.99.2\TargetFolder" /E /MT:16 /R:1 /W:1 /N
 ```
 
 #On adapter disable energy savings
-#Energy Efficient Ethernet (EEE) → Disabled
-#Green Ethernet → Disabled
-#Power Saving Mode → Disabled
-#Gigabit Lite (if listed) → Disabled
-#Auto Disable Gigabit (if listed) → Disabled
-#Idle Power Saving (if present) → Disabled
+Energy Efficient Ethernet (EEE) → Disabled
+Green Ethernet → Disabled
+Power Saving Mode → Disabled
+Gigabit Lite (if listed) → Disabled
+Auto Disable Gigabit (if listed) → Disabled
+Idle Power Saving (if present) → Disabled
 
 ```powershell
 Get-NetAdapter | Where-Object { $_.InterfaceDescription -like "*Realtek*" } | Select-Object Name, InterfaceDescription, LinkSpeed, Status
